@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 218 31% 6%;
+    --foreground: 220 33% 95%;
+
+    --card: 219 28% 13%;
+    --card-foreground: 220 33% 95%;
+
+    --primary: 42 78% 60%;
+    --primary-foreground: 30 60% 8%;
+
+    --secondary: 219 24% 18%;
+    --secondary-foreground: 220 33% 95%;
+
+    --muted: 219 24% 18%;
+    --muted-foreground: 218 16% 62%;
+
+    --accent: 219 28% 17%;
+    --accent-foreground: 220 33% 95%;
+
+    --destructive: 359 73% 59%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 218 32% 21%;
+    --input: 218 32% 21%;
+    --ring: 42 78% 60%;
+
+    --radius: 0.9rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  /* Hide scrollbars on horizontal rows */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* Atmospheric mesh background used by the app shell */
+.app-mesh {
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(60% 50% at 80% -10%, rgba(232,184,75,0.10), transparent 60%),
+    radial-gradient(50% 40% at -10% 10%, rgba(123,63,242,0.10), transparent 60%);
+}
+
+.glass {
+  background: rgba(11, 14, 20, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}

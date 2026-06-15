@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" role="img" aria-label="MonCash">
+  <!-- PLACEHOLDER — replace with the official MonCash logo SVG you obtain from Digicel. -->
+  <rect width="120" height="32" rx="6" fill="#E5121F"/>
+  <text x="60" y="21" font-family="Arial, sans-serif" font-size="14" font-weight="700"
+        text-anchor="middle" fill="#FFFFFF">MonCash</text>
+</svg>
