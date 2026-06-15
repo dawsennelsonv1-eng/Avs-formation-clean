@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ImageUp, Loader2, Maximize2, Minimize2, Send, Sparkles, X } from "lucide-react";
+import Link from "next/link";
+import { ImageUp, Loader2, LogIn, Maximize2, Minimize2, Send, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Course } from "@/types";
 
@@ -16,7 +17,7 @@ const SUGGESTED = [
   "Quelle est l'erreur la plus fréquente ?",
 ];
 
-export function AITutor({ course }: { course: Course }) {
+export function AITutor({ course, signedIn }: { course: Course; signedIn: boolean }) {
   const [msgs, setMsgs] = useState<Msg[]>([
     { role: "model", text: `Bonjour 👋 Je suis ton tuteur IA pour « ${course.title} ». Pose-moi une question, ou envoie une capture de l'endroit où tu bloques.` },
   ]);
@@ -24,6 +25,7 @@ export function AITutor({ course }: { course: Course }) {
   const [shot, setShot] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [needsLogin, setNeedsLogin] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -43,6 +45,12 @@ export function AITutor({ course }: { course: Course }) {
   const send = async (text?: string) => {
     const content = (text ?? input).trim();
     if ((!content && !shot) || streaming) return;
+
+    // Require login before chatting with the tutor.
+    if (!signedIn) {
+      setNeedsLogin(true);
+      return;
+    }
 
     // Sending counts as interacting → grow to fullscreen.
     setExpanded(true);
@@ -195,6 +203,19 @@ export function AITutor({ course }: { course: Course }) {
 
   const footer = (
     <>
+      {needsLogin && !signedIn && (
+        <div className="mb-2.5 flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/10 p-3">
+          <span className="flex-1 text-[12px] font-medium text-gold">
+            Connecte-toi pour discuter avec le tuteur IA.
+          </span>
+          <Link
+            href="/auth/login?next=/learning"
+            className="inline-flex items-center gap-1 rounded-lg bg-gold px-3 py-1.5 text-[11px] font-bold text-[#1a1208]"
+          >
+            <LogIn className="h-3.5 w-3.5" /> Se connecter
+          </Link>
+        </div>
+      )}
       {suggestedRow}
       {shotPreview}
       {inputBar}

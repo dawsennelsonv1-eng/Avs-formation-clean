@@ -9,11 +9,15 @@ export interface AuthResult {
   error?: string;
 }
 
+const configured = () =>
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
 export async function login(_prev: AuthResult, formData: FormData): Promise<AuthResult> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) return { error: "Email et mot de passe requis." };
+  if (!configured()) return { error: "Service d'authentification indisponible pour le moment." };
 
   const supabase = createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -39,6 +43,7 @@ export async function signup(_prev: AuthResult, formData: FormData): Promise<Aut
   if (password.length < 6) {
     return { error: "Le mot de passe doit faire au moins 6 caractères." };
   }
+  if (!configured()) return { error: "Service d'authentification indisponible pour le moment." };
 
   const supabase = createClient();
   const origin = headers().get("origin") ?? "";
@@ -78,6 +83,9 @@ function traduireErreur(msg: string): string {
 }
 
 export async function signInWithGoogle() {
+  if (!configured()) {
+    redirect(`/auth/login?error=${encodeURIComponent("Connexion Google non configurée pour le moment.")}`);
+  }
   const supabase = createClient();
   const origin = headers().get("origin") ?? "";
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -93,6 +101,7 @@ export async function signInWithGoogle() {
 export async function requestPasswordReset(_prev: AuthResult, formData: FormData): Promise<AuthResult> {
   const email = String(formData.get("email") ?? "").trim();
   if (!email) return { error: "Email requis." };
+  if (!configured()) return { error: "Service d'authentification indisponible pour le moment." };
 
   const supabase = createClient();
   const origin = headers().get("origin") ?? "";

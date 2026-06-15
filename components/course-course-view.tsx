@@ -127,7 +127,7 @@ export function CourseView({
               title="Apprends & mémorise"
               className="mt-0"
             />
-            <LearningHub course={course} cards={cards} quiz={quiz} />
+            <LearningHub course={course} cards={cards} quiz={quiz} signedIn={signedIn} />
           </div>
         )}
 

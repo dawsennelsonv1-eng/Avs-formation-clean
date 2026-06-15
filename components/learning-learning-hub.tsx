@@ -12,10 +12,12 @@ export function LearningHub({
   course,
   cards,
   quiz,
+  signedIn,
 }: {
   course: Course;
   cards: Flashcard[];
   quiz: QuizQuestion[];
+  signedIn: boolean;
 }) {
   const hasCards = cards.length > 0;
   const hasQuiz = quiz.length > 0;
@@ -40,7 +42,7 @@ export function LearningHub({
         </TabsList>
 
         <TabsContent value="tutor">
-          <AITutor course={course} />
+          <AITutor course={course} signedIn={signedIn} />
         </TabsContent>
         {hasCards && (
           <TabsContent value="cards">

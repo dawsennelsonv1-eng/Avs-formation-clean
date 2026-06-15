@@ -23,10 +23,14 @@ export function Header({ streak = 7 }: { streak?: number }) {
         </Link>
 
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2">
+          <Link
+            href="/learning"
+            aria-label="Mes formations"
+            className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 transition-colors hover:bg-accent active:scale-95"
+          >
             <Flame className="h-4 w-4 text-gold" />
             <span className="text-[13px] font-bold">{streak}</span>
-          </div>
+          </Link>
           <Link
             href="/notifications"
             aria-label="Notifications"
