@@ -25,6 +25,8 @@ export interface Bundle {
   price: number;
   was: number;
   color: string;
+  courseIds: string[];
+  blurb?: string;
 }
 
 export interface AppEvent {

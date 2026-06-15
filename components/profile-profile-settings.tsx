@@ -9,6 +9,16 @@ import { cn } from "@/lib/utils";
 import { signout } from "@/app/auth/actions";
 import Link from "next/link";
 
+// Maps each settings label to a real destination.
+const ROUTES: Record<string, string> = {
+  "Modifier le profil": "/settings/profile",
+  "Notifications": "/settings/notifications",
+  "Moyens de paiement": "/settings/payment",
+  "Aide & support": "/settings/support",
+  "Conditions d'utilisation": "/legal/terms",
+  "Politique de confidentialité": "/legal/privacy",
+};
+
 export function ProfileSettings({ signedIn }: { signedIn: boolean }) {
   const d = getDict();
   const [locale, setLocale] = useState<Locale>("fr");
@@ -44,45 +54,32 @@ export function ProfileSettings({ signedIn }: { signedIn: boolean }) {
 
       <SectionTitle icon={<Settings className="h-[17px] w-[17px] text-gold" />} title={d.profile.settings} />
       <div className="grid">
-        {items.map((item) =>
-          item === "Déconnexion" ? (
-            <form key={item} action={signout}>
-              <button
-                type="submit"
-                className="flex w-full items-center justify-between border-b border-border py-3.5 text-sm font-semibold text-destructive"
-              >
-                {item}
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </form>
-          ) : item === "Politique de confidentialité" ? (
+        {items.map((item) => {
+          if (item === "Déconnexion") {
+            return (
+              <form key={item} action={signout}>
+                <button
+                  type="submit"
+                  className="flex w-full items-center justify-between border-b border-border py-3.5 text-sm font-semibold text-destructive"
+                >
+                  {item}
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </form>
+            );
+          }
+          const href = ROUTES[item] ?? "/settings/support";
+          return (
             <Link
               key={item}
-              href="/legal/privacy"
+              href={href}
               className="flex items-center justify-between border-b border-border py-3.5 text-sm font-semibold transition-colors hover:text-gold"
             >
               {item}
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </Link>
-          ) : item === "Conditions d'utilisation" ? (
-            <Link
-              key={item}
-              href="/legal/terms"
-              className="flex items-center justify-between border-b border-border py-3.5 text-sm font-semibold transition-colors hover:text-gold"
-            >
-              {item}
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
-          ) : (
-            <button
-              key={item}
-              className="flex items-center justify-between border-b border-border py-3.5 text-sm font-semibold transition-colors hover:text-gold"
-            >
-              {item}
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </button>
-          )
-        )}
+          );
+        })}
       </div>
     </>
   );

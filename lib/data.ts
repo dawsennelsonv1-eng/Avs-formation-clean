@@ -32,8 +32,10 @@ export const COURSES: Course[] = [
 ];
 
 export const BUNDLES: Bundle[] = [
-  { id: "b1", title: "Pack Entrepreneur Complet", count: 4, price: 4900, was: 7200, color: "#7B3FF2" },
-  { id: "b2", title: "Bundle Marketing Pro", count: 2, price: 2400, was: 2700, color: "#F2618C" },
+  { id: "b1", title: "Pack Entrepreneur Complet", count: 4, price: 4900, was: 7200, color: "#7B3FF2",
+    courseIds: ["c1", "c3", "c4", "c5"], blurb: "Tout ce qu'il faut pour lancer et scaler ton business." },
+  { id: "b2", title: "Bundle Marketing Pro", count: 2, price: 2400, was: 2700, color: "#F2618C",
+    courseIds: ["c1", "c5"], blurb: "Deviens redoutable en marketing digital et organique." },
 ];
 
 export const EVENTS: AppEvent[] = [
