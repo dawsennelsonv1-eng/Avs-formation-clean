@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ImageUp, Loader2, LogIn, Maximize2, Minimize2, Send, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,8 +27,11 @@ export function AITutor({ course, signedIn }: { course: Course; signedIn: boolea
   const [streaming, setStreaming] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [needsLogin, setNeedsLogin] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setMounted(true), []);
 
   // Lock background scroll while the tutor is fullscreen.
   useEffect(() => {
@@ -225,11 +229,11 @@ export function AITutor({ course, signedIn }: { course: Course; signedIn: boolea
     </>
   );
 
-  /* ---------- FULLSCREEN ---------- */
-  if (expanded) {
-    return (
-      <div className="fixed inset-0 z-[60] flex justify-center bg-black/70 backdrop-blur-sm">
-        <div className="flex h-[100dvh] w-full max-w-[480px] flex-col bg-background">
+  /* ---------- FULLSCREEN (portaled to body so no ancestor can clip/transform it) ---------- */
+  if (expanded && mounted) {
+    return createPortal(
+      <div className="fixed inset-0 z-[100] flex justify-center bg-black/70 backdrop-blur-sm">
+        <div className="flex h-full max-h-[100dvh] w-full max-w-[480px] flex-col bg-background">
           <header className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex min-w-0 items-center gap-2">
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-gold/15">
@@ -255,7 +259,8 @@ export function AITutor({ course, signedIn }: { course: Course; signedIn: boolea
 
           <div className="border-t border-border bg-background px-4 py-3">{footer}</div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
