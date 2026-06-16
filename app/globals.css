@@ -62,3 +62,7 @@
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
+
+/* Guard: never let content overflow horizontally (prevents the mobile frame
+   from rendering "desktop-wide" if a child is too wide). Safe with sticky headers. */
+html, body { overflow-x: hidden; max-width: 100%; }

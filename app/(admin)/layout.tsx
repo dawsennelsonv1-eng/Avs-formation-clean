@@ -8,7 +8,7 @@ export const metadata = { title: "Admin — AVS Formation" };
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();
   return (
-    <div className="app-mesh mx-auto min-h-screen max-w-[440px] px-4 pb-16 pt-4">
+    <div className="app-mesh mx-auto min-h-screen w-full max-w-[440px] overflow-x-hidden px-4 pb-16 pt-4">
       <div className="mb-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-1 text-[13px] text-muted-foreground">
           <ChevronLeft className="h-4 w-4" /> Quitter

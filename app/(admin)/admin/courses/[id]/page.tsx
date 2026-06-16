@@ -19,11 +19,10 @@ export default async function EditCoursePage({ params }: { params: { id: string 
     <div className="animate-fade-up">
       <h1 className="mb-4 font-display text-[22px] font-extrabold">Modifier la formation</h1>
       <CourseForm course={course} />
-      {course.hasLearningTools ? (
-        <CourseContentManager courseId={course.id} lessons={lessons} cards={cards} quiz={quiz} />
-      ) : (
-        <p className="mt-6 rounded-2xl border border-dashed border-border p-4 text-center text-[12px] text-muted-foreground">
-          Active « Outils d'apprentissage » et enregistre pour gérer leçons, flashcards et quiz.
+      <CourseContentManager courseId={course.id} lessons={lessons} cards={cards} quiz={quiz} />
+      {!course.hasLearningTools && (
+        <p className="mt-4 rounded-2xl border border-dashed border-border p-3 text-center text-[11px] text-muted-foreground">
+          Astuce : active « Outils d'apprentissage » ci-dessus pour que les flashcards, quiz et le tuteur IA soient visibles par les étudiants. Tu peux ajouter le contenu ici dans tous les cas.
         </p>
       )}
     </div>
