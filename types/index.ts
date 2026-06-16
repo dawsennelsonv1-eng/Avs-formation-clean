@@ -12,7 +12,8 @@ export interface Course {
   reviews: number;
   durationMin: number;
   lessons: number;
-  color: string;        // flyer gradient base
+  color: string;        // flyer gradient base (fallback when no image)
+  flyerUrl?: string | null; // uploaded banner image, used everywhere
   upcoming?: boolean;
   hasSummary?: boolean; // some flyers show a summary/gift, some don't
   hasLearningTools?: boolean; // per-course: enable AI tutor / quizzes / flashcards

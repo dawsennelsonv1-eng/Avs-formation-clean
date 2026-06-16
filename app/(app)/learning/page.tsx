@@ -43,6 +43,10 @@ export default async function LearningPage() {
             className="relative overflow-hidden rounded-3xl border border-border p-5"
             style={{ backgroundImage: `linear-gradient(150deg, ${featured.color} 0%, ${featured.color}40 50%, #0b0e14 100%)` }}
           >
+            {featured.flyerUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={featured.flyerUrl} alt={featured.title} className="absolute inset-0 h-full w-full object-cover" />
+            )}
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_75%_15%,rgba(255,255,255,0.15),transparent_55%)]" />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/80 to-transparent" />
 
@@ -81,8 +85,12 @@ export default async function LearningPage() {
               return (
                 <Link key={c.id} href={`/courses/${c.id}`}>
                   <Card className="flex items-center gap-3 p-3">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ backgroundImage: `linear-gradient(155deg, ${c.color}, #0c0f17)` }}>
-                      <Play className="h-5 w-5 text-white/90" />
+                    <div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl" style={{ backgroundImage: `linear-gradient(155deg, ${c.color}, #0c0f17)` }}>
+                      {c.flyerUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={c.flyerUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      )}
+                      <Play className="relative h-5 w-5 text-white/90" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-[13px] font-bold">{c.title}</div>

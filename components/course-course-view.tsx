@@ -55,6 +55,13 @@ export function CourseView({
         className="relative grid aspect-video place-items-center overflow-hidden"
         style={{ backgroundImage: `linear-gradient(135deg, ${course.color}, #0c0f17)` }}
       >
+        {course.flyerUrl && !playing && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={course.flyerUrl} alt={course.title} className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-black/45" />
+          </>
+        )}
         <Button asChild size="icon" variant="secondary" className="absolute left-3.5 top-3.5 z-10 bg-black/55">
           <Link href="/courses" aria-label="Retour">
             <ChevronLeft className="h-5 w-5" />
@@ -68,7 +75,7 @@ export function CourseView({
               <source src="/demo.mp4" type="video/mp4" />
             </video>
           ) : (
-            <button onClick={() => setPlaying(true)} className="text-center">
+            <button onClick={() => setPlaying(true)} className="relative z-10 text-center">
               <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-white shadow-2xl transition-transform active:scale-95">
                 <Play className="ml-0.5 h-6 w-6 fill-black text-black" />
               </div>
@@ -76,7 +83,7 @@ export function CourseView({
             </button>
           )
         ) : (
-          <button onClick={openPay} className="text-center">
+          <button onClick={openPay} className="relative z-10 text-center">
             <div className="mx-auto grid h-16 w-16 place-items-center rounded-full border-2 border-gold bg-black/50 transition-transform active:scale-95">
               <Lock className="h-6 w-6 text-gold" />
             </div>

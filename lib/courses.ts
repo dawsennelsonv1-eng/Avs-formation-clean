@@ -16,6 +16,7 @@ function rowToCourse(r: any): Course {
     durationMin: r.duration_min ?? 0,
     lessons: r.lessons ?? 0,
     color: r.color ?? "#7B3FF2",
+    flyerUrl: r.flyer_url ?? null,
     upcoming: r.upcoming ?? false,
     hasLearningTools: r.has_learning_tools ?? false,
   };

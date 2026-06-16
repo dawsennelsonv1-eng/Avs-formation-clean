@@ -44,6 +44,10 @@ export function CourseCard({
         className="relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-2xl border border-border p-3 shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-black/30 group-hover:ring-1 group-hover:ring-gold/40"
         style={{ backgroundImage: `linear-gradient(160deg, ${course.color} 0%, ${course.color}55 45%, #0b0e14 100%)` }}
       >
+        {course.flyerUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={course.flyerUrl} alt={course.title} className="absolute inset-0 h-full w-full object-cover" />
+        )}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_15%,rgba(255,255,255,0.18),transparent_50%)]" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 

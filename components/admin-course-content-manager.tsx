@@ -69,15 +69,13 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
   const [dur, setDur] = useState("");
   const [preview, setPreview] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
-  const [videoName, setVideoName] = useState("");
-  const [videoUploading, setVideoUploading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [content, setContent] = useState("");
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
   const del = useDelete("/api/admin/lessons");
 
-  // Direct browser → Supabase Storage upload (bypasses the API body-size limit, handles large video).
+  // Direct browser → Supabase Storage upload for images (small files, bypasses API limit).
   const uploadToStorage = async (file: File, folder: string): Promise<string | null> => {
     const supabase = createBrowserSupabase();
     const ext = file.name.split(".").pop() || "bin";
@@ -94,18 +92,6 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
     return data.publicUrl;
   };
 
-  const uploadVideo = async (file?: File) => {
-    if (!file) return;
-    setVideoUploading(true);
-    const url = await uploadToStorage(file, "videos");
-    if (url) {
-      setVideoUrl(url);
-      setVideoName(file.name);
-      toast("Vidéo téléversée ✓", "success");
-    }
-    setVideoUploading(false);
-  };
-
   const uploadImages = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setUploading(true);
@@ -118,7 +104,7 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
   };
 
   const reset = () => {
-    setTitle(""); setDur(""); setPreview(false); setVideoUrl(""); setVideoName(""); setImages([]); setContent("");
+    setTitle(""); setDur(""); setPreview(false); setVideoUrl(""); setImages([]); setContent("");
   };
 
   const add = async () => {
@@ -171,26 +157,19 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
           </button>
         </div>
 
-        {/* Video — direct upload */}
+        {/* Video — YouTube link (unlisted) */}
         <div>
           <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
-            <Video className="h-3.5 w-3.5" /> Vidéo de la leçon
+            <Video className="h-3.5 w-3.5" /> Vidéo de la leçon (lien YouTube)
           </div>
-          {videoUrl ? (
-            <div className="flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/5 p-2.5">
-              <Video className="h-4 w-4 shrink-0 text-gold" />
-              <span className="min-w-0 flex-1 truncate text-[12px] text-muted-foreground">{videoName || "Vidéo téléversée"}</span>
-              <button onClick={() => { setVideoUrl(""); setVideoName(""); }} className="shrink-0 text-muted-foreground hover:text-destructive">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border py-3 text-[12px] font-semibold text-muted-foreground">
-              {videoUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
-              {videoUploading ? "Téléversement…" : "Téléverser une vidéo"}
-              <input type="file" accept="video/*" className="hidden" onChange={(e) => uploadVideo(e.target.files?.[0])} />
-            </label>
-          )}
+          <Input
+            placeholder="https://youtube.com/watch?v=..."
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+          />
+          <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+            Mets ta vidéo en « Non répertoriée » sur YouTube, puis colle le lien ici. Gratuit et sans limite de taille.
+          </p>
         </div>
 
         {/* Slideshow images */}
@@ -233,7 +212,7 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
           />
         </div>
 
-        <Button onClick={add} disabled={uploading || videoUploading}><Plus className="h-4 w-4" /> Ajouter la leçon</Button>
+        <Button onClick={add} disabled={uploading}><Plus className="h-4 w-4" /> Ajouter la leçon</Button>
       </div>
     </div>
   );
