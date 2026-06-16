@@ -157,18 +157,18 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
           </button>
         </div>
 
-        {/* Video — YouTube link (unlisted) */}
+        {/* Video — Bunny Stream embed link */}
         <div>
           <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
-            <Video className="h-3.5 w-3.5" /> Vidéo de la leçon (lien YouTube)
+            <Video className="h-3.5 w-3.5" /> Vidéo de la leçon (lien Bunny Stream)
           </div>
           <Input
-            placeholder="https://youtube.com/watch?v=..."
+            placeholder="https://iframe.mediadelivery.net/embed/..."
             value={videoUrl}
             onChange={(e) => setVideoUrl(e.target.value)}
           />
           <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
-            Mets ta vidéo en « Non répertoriée » sur YouTube, puis colle le lien ici. Gratuit et sans limite de taille.
+            Sur Bunny Stream : ouvre ta vidéo → onglet « Embed » → copie le lien « iframe.mediadelivery.net » et colle-le ici.
           </p>
         </div>
 

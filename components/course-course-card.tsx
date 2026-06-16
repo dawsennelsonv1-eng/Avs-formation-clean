@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Brain, Clock, Lock, Star } from "lucide-react";
+import { Brain, Check, Clock, Lock, Star } from "lucide-react";
 import { formatHTG, cn } from "@/lib/utils";
 import { getDict } from "@/config/i18n";
 import type { Course } from "@/types";
@@ -23,11 +23,13 @@ export function CourseCard({
   className,
   fill,
   width,
+  owned,
 }: {
   course: Course;
   className?: string;
   fill?: boolean;
   width?: number;
+  owned?: boolean;
 }) {
   const d = getDict();
   const hours = Math.floor(course.durationMin / 60);
@@ -53,7 +55,11 @@ export function CourseCard({
 
         {/* Top row: price (left) + BIENTÔT (right) — only two, never collide */}
         <div className="absolute inset-x-2.5 top-2.5 flex items-start justify-between">
-          {course.isFree ? (
+          {owned ? (
+            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500 px-1.5 py-1 text-[10px] font-extrabold leading-none text-white">
+              <Check className="h-2.5 w-2.5" /> Débloqué
+            </span>
+          ) : course.isFree ? (
             <span className="rounded-md bg-emerald-500 px-1.5 py-1 text-[10px] font-extrabold leading-none text-white">
               {d.courses.free}
             </span>

@@ -72,6 +72,10 @@ export function BundleCase({ bundle, courses }: { bundle: Bundle; courses: Cours
               }}
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_15%,rgba(255,255,255,0.22),transparent_55%)]" />
+              {c.flyerUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={c.flyerUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              )}
               <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 to-transparent" />
               <div className="absolute inset-0 flex items-end p-2.5">
                 <span className="line-clamp-3 text-[10px] font-bold leading-tight text-white">{c.title}</span>

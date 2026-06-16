@@ -36,7 +36,7 @@ export async function getLessons(courseId: string): Promise<Lesson[]> {
       .eq("course_id", courseId)
       .order("position");
 
-    if (!lessons?.length) return MOCK;
+    if (!lessons?.length) return [];
 
     let done = new Set<string>();
     if (user) {
@@ -59,6 +59,6 @@ export async function getLessons(courseId: string): Promise<Lesson[]> {
       content: l.content ?? null,
     }));
   } catch {
-    return MOCK;
+    return [];
   }
 }

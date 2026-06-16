@@ -58,7 +58,7 @@ export async function getFlashcards(courseId: string): Promise<Flashcard[]> {
     const { data } = await s.from("flashcards").select("id,front,back").eq("course_id", courseId).order("position");
     return data?.length ? data : MOCK_CARDS;
   } catch {
-    return MOCK_CARDS;
+    return [];
   }
 }
 
@@ -71,7 +71,7 @@ export async function getQuiz(courseId: string): Promise<QuizQuestion[]> {
       .select("id,question,options,correct_index,explanation")
       .eq("course_id", courseId)
       .order("position");
-    if (!data?.length) return MOCK_QUIZ;
+    if (!data?.length) return [];
     return data.map((q: any) => ({
       id: q.id,
       question: q.question,
@@ -80,7 +80,7 @@ export async function getQuiz(courseId: string): Promise<QuizQuestion[]> {
       explanation: q.explanation ?? undefined,
     }));
   } catch {
-    return MOCK_QUIZ;
+    return [];
   }
 }
 
@@ -93,7 +93,7 @@ export async function getReviews(courseId: string): Promise<Review[]> {
       .select("id,rating,body,author_name,created_at")
       .eq("course_id", courseId)
       .order("created_at", { ascending: false });
-    if (!data?.length) return MOCK_REVIEWS;
+    if (!data?.length) return [];
     return data.map((r: any) => ({
       id: r.id,
       rating: r.rating,
@@ -102,6 +102,6 @@ export async function getReviews(courseId: string): Promise<Review[]> {
       date: new Date(r.created_at).toLocaleDateString("fr-FR"),
     }));
   } catch {
-    return MOCK_REVIEWS;
+    return [];
   }
 }

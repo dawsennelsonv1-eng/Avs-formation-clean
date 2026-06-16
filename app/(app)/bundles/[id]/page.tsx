@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, Check, Layers } from "lucide-react";
 import { getBundleById } from "@/lib/bundles";
 import { getAllCourses } from "@/lib/courses";
+import { getMyCourseIds } from "@/lib/enrollments";
 import { CourseCard } from "@/components/course-course-card";
 import { formatHTG } from "@/lib/utils";
 
@@ -10,8 +11,10 @@ export default async function BundlePage({ params }: { params: { id: string } })
   const bundle = await getBundleById(params.id);
   if (!bundle) notFound();
 
-  const allCourses = await getAllCourses();
+  const [allCourses, myCourseIds] = await Promise.all([getAllCourses(), getMyCourseIds()]);
   const courses = allCourses.filter((c) => bundle.courseIds.includes(c.id));
+  const ownedSet = new Set(myCourseIds);
+  const owned = courses.length > 0 && courses.every((c) => ownedSet.has(c.id));
   const discount = bundle.was > 0 ? Math.round((1 - bundle.price / bundle.was) * 100) : 0;
   const totalValue = courses.reduce((sum, c) => sum + c.price, 0);
 
@@ -36,16 +39,24 @@ export default async function BundlePage({ params }: { params: { id: string } })
         {bundle.blurb && <p className="mt-1.5 text-[13px] text-white/65">{bundle.blurb}</p>}
 
         <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 p-3.5 backdrop-blur-sm">
-          <div className="flex-1">
-            <div className="flex items-baseline gap-2">
-              <span className="font-display text-2xl font-extrabold text-gold">{formatHTG(bundle.price)}</span>
-              <span className="text-sm text-white/40 line-through">{formatHTG(bundle.was)}</span>
+          {owned ? (
+            <div className="flex w-full items-center justify-center gap-2 py-1 text-[15px] font-bold text-emerald-400">
+              <Check className="h-5 w-5" /> Tu as déjà débloqué cette offre
             </div>
-            <div className="mt-0.5 text-[11px] text-emerald-400">Tu économises {formatHTG(totalValue - bundle.price)} ({discount}%)</div>
-          </div>
-          <button className="rounded-xl bg-gold px-5 py-3 font-display text-sm font-extrabold text-[#1a1208] transition active:scale-95">
-            Débloquer tout
-          </button>
+          ) : (
+            <>
+              <div className="flex-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="font-display text-2xl font-extrabold text-gold">{formatHTG(bundle.price)}</span>
+                  <span className="text-sm text-white/40 line-through">{formatHTG(bundle.was)}</span>
+                </div>
+                <div className="mt-0.5 text-[11px] text-emerald-400">Tu économises {formatHTG(totalValue - bundle.price)} ({discount}%)</div>
+              </div>
+              <Link href="/courses" className="rounded-xl bg-gold px-5 py-3 font-display text-sm font-extrabold text-[#1a1208] transition active:scale-95">
+                Débloquer tout
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -55,7 +66,7 @@ export default async function BundlePage({ params }: { params: { id: string } })
         <p className="mb-4 text-[12px] text-muted-foreground">{courses.length} formations incluses</p>
         <div className="grid grid-cols-2 gap-3.5">
           {courses.map((c) => (
-            <CourseCard key={c.id} course={c} fill />
+            <CourseCard key={c.id} course={c} fill owned={ownedSet.has(c.id)} />
           ))}
         </div>
 

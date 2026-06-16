@@ -71,3 +71,17 @@ export async function getMyEnrollments(): Promise<MyEnrollment[]> {
     return [];
   }
 }
+
+/** Set of course IDs the signed-in user has access to (for owned-state UI). */
+export async function getMyCourseIds(): Promise<string[]> {
+  if (!configured()) return [];
+  try {
+    const s = createClient();
+    const { data: { user } } = await s.auth.getUser();
+    if (!user) return [];
+    const { data } = await s.from("enrollments").select("course_id").eq("user_id", user.id);
+    return (data ?? []).map((r: any) => r.course_id);
+  } catch {
+    return [];
+  }
+}

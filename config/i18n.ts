@@ -31,7 +31,7 @@ export const t = {
       filters: ["Tout", "Gratuit", "Marketing", "Ventes", "Cartes", "E-commerce", "Finance"],
     },
     learning: {
-      title: "Ma Formation",
+      title: "Mes formations",
       continue: "Reprendre",
       enrolled: "Mes formations",
       progress: "Progression",

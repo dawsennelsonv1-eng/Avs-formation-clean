@@ -30,10 +30,10 @@ export async function getAllCourses(): Promise<Course[]> {
   try {
     const supabase = createClient();
     const { data, error } = await supabase.from("courses").select("*").order("created_at");
-    if (error || !data?.length) return MOCK;
+    if (error || !data?.length) return [];
     return data.map(rowToCourse);
   } catch {
-    return MOCK;
+    return [];
   }
 }
 
@@ -42,10 +42,10 @@ export async function getCourseById(id: string): Promise<Course | null> {
   try {
     const supabase = createClient();
     const { data, error } = await supabase.from("courses").select("*").eq("id", id).single();
-    if (error || !data) return MOCK.find((c) => c.id === id) ?? null;
+    if (error || !data) return null;
     return rowToCourse(data);
   } catch {
-    return MOCK.find((c) => c.id === id) ?? null;
+    return null;
   }
 }
 
