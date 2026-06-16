@@ -14,7 +14,7 @@ export async function extractTransactionId(
   if (!key) throw new Error("GEMINI_API_KEY manquant.");
 
   const genAI = new GoogleGenerativeAI(key);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-8b" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   // Strip a data URL prefix if present.
   const data = base64Image.includes(",") ? base64Image.split(",")[1] : base64Image;

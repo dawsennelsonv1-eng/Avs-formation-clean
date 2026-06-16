@@ -17,10 +17,11 @@ function rowToBundle(r: any): Bundle {
     count: members.length,
     courseIds: members.map((m: any) => m.course_id),
     featured: r.featured ?? false,
+    imageUrl: r.image_url ?? null,
   };
 }
 
-const SELECT = "id,title,blurb,price,was,color,featured,position,bundle_courses(course_id,position)";
+const SELECT = "id,title,blurb,price,was,color,featured,image_url,position,bundle_courses(course_id,position)";
 
 export async function getBundles(): Promise<Bundle[]> {
   if (!configured()) return MOCK;

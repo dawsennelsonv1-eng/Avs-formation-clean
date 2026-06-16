@@ -29,6 +29,7 @@ export interface Bundle {
   courseIds: string[];
   blurb?: string;
   featured?: boolean;
+  imageUrl?: string | null;
 }
 
 export interface AppEvent {

@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
       was: Number(b.was) || 0,
       color: b.color ?? "#7B3FF2",
       featured: !!b.featured,
+      image_url: b.imageUrl ?? null,
       position: Number(b.position) || 0,
     })
     .select("id")
@@ -55,6 +56,7 @@ export async function PUT(req: NextRequest) {
   if (b.was !== undefined) patch.was = Number(b.was) || 0;
   if (b.color !== undefined) patch.color = b.color;
   if (b.featured !== undefined) patch.featured = !!b.featured;
+  if (b.imageUrl !== undefined) patch.image_url = b.imageUrl || null;
   const { error } = await s.from("bundles").update(patch).eq("id", b.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (Array.isArray(b.courseIds)) await setMembers(s, b.id, b.courseIds);

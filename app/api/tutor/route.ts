@@ -31,7 +31,7 @@ Règles:
 - Reste dans le sujet de la formation.`;
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: "gemini-2.5-flash",
     systemInstruction: system,
     generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
   });

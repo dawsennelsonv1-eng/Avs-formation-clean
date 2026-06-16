@@ -29,8 +29,12 @@ export function BundleCase({ bundle, courses }: { bundle: Bundle; courses: Cours
   return (
     <Link
       href={`/bundles/${bundle.id}`}
-      className="group relative block w-[290px] shrink-0 overflow-hidden rounded-3xl border border-border p-4 transition-colors hover:border-gold/40"
-      style={{ backgroundImage: `linear-gradient(150deg, ${bundle.color}38 0%, #0b0e14 60%)` }}
+      className="group relative block w-[290px] shrink-0 overflow-hidden rounded-3xl border border-border bg-cover bg-center p-4 transition-colors hover:border-gold/40"
+      style={{
+        backgroundImage: bundle.imageUrl
+          ? `linear-gradient(150deg, rgba(11,14,20,0.55), rgba(11,14,20,0.88)), url(${bundle.imageUrl})`
+          : `linear-gradient(150deg, ${bundle.color}38 0%, #0b0e14 60%)`,
+      }}
     >
       <div
         className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-2xl"

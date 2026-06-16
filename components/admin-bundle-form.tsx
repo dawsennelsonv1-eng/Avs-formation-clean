@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Loader2, Trash2 } from "lucide-react";
+import { Check, ImageUp, Loader2, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui-button";
 import { Input } from "@/components/ui-input";
 import { useToast } from "@/components/ui-toast";
+import { createBrowserSupabase } from "@/lib/supabase-browser";
 import { cn, formatHTG } from "@/lib/utils";
 import type { Bundle, Course } from "@/types";
 
@@ -24,9 +25,30 @@ export function BundleForm({ bundle, courses }: { bundle?: Bundle; courses: Cour
     color: bundle?.color ?? COLORS[0],
     featured: bundle?.featured ?? false,
     courseIds: bundle?.courseIds ?? [],
+    imageUrl: bundle?.imageUrl ?? "",
   });
   const [saving, setSaving] = useState(false);
+  const [imgUploading, setImgUploading] = useState(false);
   const set = (k: keyof typeof form, v: any) => setForm((f) => ({ ...f, [k]: v }));
+
+  const uploadImage = async (file?: File) => {
+    if (!file) return;
+    setImgUploading(true);
+    try {
+      const supabase = createBrowserSupabase();
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `bundles/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("course-media").upload(path, file, { contentType: file.type });
+      if (error) toast(error.message, "error");
+      else {
+        const { data } = supabase.storage.from("course-media").getPublicUrl(path);
+        set("imageUrl", data.publicUrl);
+        toast("Bannière téléversée ✓", "success");
+      }
+    } finally {
+      setImgUploading(false);
+    }
+  };
 
   const toggleCourse = (id: string) =>
     setForm((f) => ({
@@ -81,6 +103,27 @@ export function BundleForm({ bundle, courses }: { bundle?: Bundle; courses: Cour
       </Field>
       <Field label="Accroche">
         <Input value={form.blurb} onChange={(e) => set("blurb", e.target.value)} placeholder="Une phrase qui vend l'offre" />
+      </Field>
+
+      <Field label="Bannière (image de l'offre)">
+        {form.imageUrl ? (
+          <div className="relative overflow-hidden rounded-xl border border-border">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={form.imageUrl} alt="bannière" className="aspect-[16/9] w-full object-cover" />
+            <button
+              onClick={() => set("imageUrl", "")}
+              className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-black/70 text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border py-4 text-[12px] font-semibold text-muted-foreground">
+            {imgUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageUp className="h-4 w-4" />}
+            {imgUploading ? "Téléversement…" : "Téléverser une bannière"}
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadImage(e.target.files?.[0])} />
+          </label>
+        )}
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
@@ -160,7 +203,7 @@ export function BundleForm({ bundle, courses }: { bundle?: Bundle; courses: Cour
       </div>
 
       <div className="mt-2 grid gap-2">
-        <Button size="lg" onClick={save} disabled={saving}>
+        <Button size="lg" onClick={save} disabled={saving || imgUploading}>
           {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : editing ? "Enregistrer" : "Créer l'offre"}
         </Button>
         {editing && (

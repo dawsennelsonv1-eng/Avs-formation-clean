@@ -32,8 +32,12 @@ export default async function HomePage() {
       {hero && (
         <Link
           href={`/bundles/${hero.id}`}
-          className="relative block overflow-hidden rounded-3xl border border-border p-6"
-          style={{ backgroundImage: `linear-gradient(150deg, ${hero.color} 0%, #2A1854 70%)` }}
+          className="relative block overflow-hidden rounded-3xl border border-border bg-cover bg-center p-6"
+          style={{
+            backgroundImage: hero.imageUrl
+              ? `linear-gradient(to top, rgba(0,0,0,0.92), rgba(0,0,0,0.45) 60%, rgba(0,0,0,0.3)), url(${hero.imageUrl})`
+              : `linear-gradient(150deg, ${hero.color} 0%, #2A1854 70%)`,
+          }}
         >
           <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full bg-white/10 blur-sm" />
           <span className="text-[11px] font-bold tracking-wider text-[#E8C9FF]">{d.home.limited}</span>

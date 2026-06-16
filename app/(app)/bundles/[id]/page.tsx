@@ -18,7 +18,14 @@ export default async function BundlePage({ params }: { params: { id: string } })
   return (
     <div className="animate-fade-up pb-6">
       {/* Hero */}
-      <div className="relative overflow-hidden px-4 pb-6 pt-4" style={{ backgroundImage: `linear-gradient(160deg, ${bundle.color}45, #0b0e14 70%)` }}>
+      <div
+        className="relative overflow-hidden bg-cover bg-center px-4 pb-6 pt-4"
+        style={{
+          backgroundImage: bundle.imageUrl
+            ? `linear-gradient(160deg, rgba(11,14,20,0.5), rgba(11,14,20,0.9) 80%), url(${bundle.imageUrl})`
+            : `linear-gradient(160deg, ${bundle.color}45, #0b0e14 70%)`,
+        }}
+      >
         <Link href="/" className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-black/40 backdrop-blur-sm">
           <ChevronLeft className="h-5 w-5" />
         </Link>
