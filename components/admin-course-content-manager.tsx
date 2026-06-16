@@ -7,6 +7,7 @@ import { Button } from "@/components/ui-button";
 import { Input } from "@/components/ui-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-tabs";
 import { useToast } from "@/components/ui-toast";
+import { createBrowserSupabase } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
 import type { Lesson } from "@/lib/learning-lessons";
 import type { Flashcard, QuizQuestion } from "@/lib/learning-content";
@@ -68,34 +69,56 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
   const [dur, setDur] = useState("");
   const [preview, setPreview] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
+  const [videoName, setVideoName] = useState("");
+  const [videoUploading, setVideoUploading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [content, setContent] = useState("");
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
   const del = useDelete("/api/admin/lessons");
 
+  // Direct browser → Supabase Storage upload (bypasses the API body-size limit, handles large video).
+  const uploadToStorage = async (file: File, folder: string): Promise<string | null> => {
+    const supabase = createBrowserSupabase();
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from("course-media").upload(path, file, {
+      contentType: file.type,
+      upsert: false,
+    });
+    if (error) {
+      toast(error.message, "error");
+      return null;
+    }
+    const { data } = supabase.storage.from("course-media").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const uploadVideo = async (file?: File) => {
+    if (!file) return;
+    setVideoUploading(true);
+    const url = await uploadToStorage(file, "videos");
+    if (url) {
+      setVideoUrl(url);
+      setVideoName(file.name);
+      toast("Vidéo téléversée ✓", "success");
+    }
+    setVideoUploading(false);
+  };
+
   const uploadImages = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setUploading(true);
-    try {
-      for (const file of Array.from(files)) {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-        const data = await res.json();
-        if (data.url) setImages((arr) => [...arr, data.url]);
-        else toast(data.error ?? "Échec du téléversement", "error");
-      }
-      toast("Image(s) ajoutée(s) ✓", "success");
-    } catch {
-      toast("Erreur réseau.", "error");
-    } finally {
-      setUploading(false);
+    for (const file of Array.from(files)) {
+      const url = await uploadToStorage(file, "slides");
+      if (url) setImages((arr) => [...arr, url]);
     }
+    setUploading(false);
+    toast("Image(s) ajoutée(s) ✓", "success");
   };
 
   const reset = () => {
-    setTitle(""); setDur(""); setPreview(false); setVideoUrl(""); setImages([]); setContent("");
+    setTitle(""); setDur(""); setPreview(false); setVideoUrl(""); setVideoName(""); setImages([]); setContent("");
   };
 
   const add = async () => {
@@ -148,12 +171,26 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
           </button>
         </div>
 
-        {/* Video URL */}
+        {/* Video — direct upload */}
         <div>
-          <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
-            <Video className="h-3.5 w-3.5" /> Vidéo (lien YouTube, Vimeo ou MP4)
+          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+            <Video className="h-3.5 w-3.5" /> Vidéo de la leçon
           </div>
-          <Input placeholder="https://..." value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
+          {videoUrl ? (
+            <div className="flex items-center gap-2 rounded-xl border border-gold/40 bg-gold/5 p-2.5">
+              <Video className="h-4 w-4 shrink-0 text-gold" />
+              <span className="min-w-0 flex-1 truncate text-[12px] text-muted-foreground">{videoName || "Vidéo téléversée"}</span>
+              <button onClick={() => { setVideoUrl(""); setVideoName(""); }} className="shrink-0 text-muted-foreground hover:text-destructive">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border py-3 text-[12px] font-semibold text-muted-foreground">
+              {videoUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
+              {videoUploading ? "Téléversement…" : "Téléverser une vidéo"}
+              <input type="file" accept="video/*" className="hidden" onChange={(e) => uploadVideo(e.target.files?.[0])} />
+            </label>
+          )}
         </div>
 
         {/* Slideshow images */}
@@ -196,7 +233,7 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
           />
         </div>
 
-        <Button onClick={add} disabled={uploading}><Plus className="h-4 w-4" /> Ajouter la leçon</Button>
+        <Button onClick={add} disabled={uploading || videoUploading}><Plus className="h-4 w-4" /> Ajouter la leçon</Button>
       </div>
     </div>
   );

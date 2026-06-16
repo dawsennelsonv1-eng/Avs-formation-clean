@@ -7,7 +7,7 @@ import { useToast } from "@/components/ui-toast";
 import { cn } from "@/lib/utils";
 import type { Lesson } from "@/lib/learning-lessons";
 
-function VideoEmbed({ url }: { url: string }) {
+function VideoEmbed({ url, watermark }: { url: string; watermark?: string }) {
   const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
   const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   if (yt) {
@@ -32,24 +32,44 @@ function VideoEmbed({ url }: { url: string }) {
       />
     );
   }
-  // eslint-disable-next-line jsx-a11y/media-has-caption
-  return <video className="aspect-video w-full rounded-xl" src={url} controls />;
+  // Uploaded video — apply download/right-click deterrents + traceable watermark.
+  return (
+    <div className="relative overflow-hidden rounded-xl" onContextMenu={(e) => e.preventDefault()}>
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <video
+        className="aspect-video w-full"
+        src={url}
+        controls
+        controlsList="nodownload noremoteplayback noplaybackrate"
+        disablePictureInPicture
+        onContextMenu={(e) => e.preventDefault()}
+      />
+      {watermark && (
+        <div className="pointer-events-none absolute right-2 top-2 rounded bg-black/40 px-2 py-0.5 text-[10px] font-semibold text-white/70">
+          {watermark}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function LessonsList({
   lessons,
   courseId,
   unlocked,
+  userName,
 }: {
   lessons: Lesson[];
   courseId: string;
   unlocked: boolean;
+  userName?: string | null;
 }) {
   const [state, setState] = useState<Lesson[]>(lessons);
   const [open, setOpen] = useState<Lesson | null>(null);
   const [slide, setSlide] = useState(0);
   const [mounted, setMounted] = useState(false);
   const { toast } = useToast();
+  const watermark = userName ? `AVS · ${userName}` : "AVS Formation";
 
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -158,15 +178,23 @@ export function LessonsList({
               <div className="flex-1 overflow-y-auto px-4 py-4">
                 {open.videoUrl && (
                   <div className="mb-4">
-                    <VideoEmbed url={open.videoUrl} />
+                    <VideoEmbed url={open.videoUrl} watermark={watermark} />
                   </div>
                 )}
 
                 {open.imageUrls.length > 0 && (
                   <div className="mb-4">
-                    <div className="relative overflow-hidden rounded-xl border border-border">
+                    <div className="relative overflow-hidden rounded-xl border border-border" onContextMenu={(e) => e.preventDefault()}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={open.imageUrls[slide]} alt={`diapositive ${slide + 1}`} className="w-full" />
+                      <img
+                        src={open.imageUrls[slide]}
+                        alt={`diapositive ${slide + 1}`}
+                        className="w-full select-none"
+                        draggable={false}
+                      />
+                      <div className="pointer-events-none absolute right-2 top-2 rounded bg-black/40 px-2 py-0.5 text-[10px] font-semibold text-white/70">
+                        {watermark}
+                      </div>
                       {open.imageUrls.length > 1 && (
                         <>
                           <button

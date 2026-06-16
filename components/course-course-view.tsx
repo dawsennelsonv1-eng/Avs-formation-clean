@@ -109,7 +109,7 @@ export function CourseView({
               title="Contenu de la formation"
               className="mt-0"
             />
-            <LessonsList lessons={lessons} courseId={course.id} unlocked={unlocked} />
+            <LessonsList lessons={lessons} courseId={course.id} unlocked={unlocked} userName={userName} />
           </div>
         )}
 
