@@ -9,14 +9,17 @@ export interface Lesson {
   durationMin: number;
   isPreview: boolean;
   completed: boolean;
+  videoUrl: string | null;
+  imageUrls: string[];
+  content: string | null;
 }
 
 const MOCK: Lesson[] = [
-  { id: "l1", title: "Introduction & état d'esprit", durationMin: 8, isPreview: true, completed: false },
-  { id: "l2", title: "Le hook parfait en 3 secondes", durationMin: 12, isPreview: false, completed: false },
-  { id: "l3", title: "Monter une vidéo qui retient", durationMin: 15, isPreview: false, completed: false },
-  { id: "l4", title: "Comprendre l'algorithme", durationMin: 10, isPreview: false, completed: false },
-  { id: "l5", title: "Analyser et itérer", durationMin: 9, isPreview: false, completed: false },
+  { id: "l1", title: "Introduction & état d'esprit", durationMin: 8, isPreview: true, completed: false, videoUrl: null, imageUrls: [], content: null },
+  { id: "l2", title: "Le hook parfait en 3 secondes", durationMin: 12, isPreview: false, completed: false, videoUrl: null, imageUrls: [], content: null },
+  { id: "l3", title: "Monter une vidéo qui retient", durationMin: 15, isPreview: false, completed: false, videoUrl: null, imageUrls: [], content: null },
+  { id: "l4", title: "Comprendre l'algorithme", durationMin: 10, isPreview: false, completed: false, videoUrl: null, imageUrls: [], content: null },
+  { id: "l5", title: "Analyser et itérer", durationMin: 9, isPreview: false, completed: false, videoUrl: null, imageUrls: [], content: null },
 ];
 
 export async function getLessons(courseId: string): Promise<Lesson[]> {
@@ -29,7 +32,7 @@ export async function getLessons(courseId: string): Promise<Lesson[]> {
 
     const { data: lessons } = await s
       .from("lessons")
-      .select("id,title,duration_min,is_preview")
+      .select("id,title,duration_min,is_preview,video_url,image_urls,content")
       .eq("course_id", courseId)
       .order("position");
 
@@ -51,6 +54,9 @@ export async function getLessons(courseId: string): Promise<Lesson[]> {
       durationMin: l.duration_min ?? 0,
       isPreview: l.is_preview ?? false,
       completed: done.has(l.id),
+      videoUrl: l.video_url ?? null,
+      imageUrls: Array.isArray(l.image_urls) ? l.image_urls : [],
+      content: l.content ?? null,
     }));
   } catch {
     return MOCK;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
+import { ImageUp, Loader2, Plus, Trash2, Video, X } from "lucide-react";
 import { Button } from "@/components/ui-button";
 import { Input } from "@/components/ui-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-tabs";
@@ -67,20 +67,55 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
   const [title, setTitle] = useState("");
   const [dur, setDur] = useState("");
   const [preview, setPreview] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [images, setImages] = useState<string[]>([]);
+  const [content, setContent] = useState("");
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
   const del = useDelete("/api/admin/lessons");
 
+  const uploadImages = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        if (data.url) setImages((arr) => [...arr, data.url]);
+        else toast(data.error ?? "Échec du téléversement", "error");
+      }
+      toast("Image(s) ajoutée(s) ✓", "success");
+    } catch {
+      toast("Erreur réseau.", "error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const reset = () => {
+    setTitle(""); setDur(""); setPreview(false); setVideoUrl(""); setImages([]); setContent("");
+  };
+
   const add = async () => {
-    if (!title.trim()) return;
+    if (!title.trim()) return toast("Le titre est requis.", "error");
     const res = await fetch("/api/admin/lessons", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ courseId, title, durationMin: dur, isPreview: preview, position: list.length }),
+      body: JSON.stringify({
+        courseId, title, durationMin: dur, isPreview: preview,
+        videoUrl: videoUrl.trim() || null, imageUrls: images, content: content.trim() || null,
+        position: list.length,
+      }),
     });
     const data = await res.json();
     if (data.error) return toast(data.error, "error");
-    setList((l) => [...l, { id: `tmp-${Date.now()}`, title, durationMin: Number(dur) || 0, isPreview: preview, completed: false }]);
-    setTitle(""); setDur(""); setPreview(false);
+    setList((l) => [
+      ...l,
+      { id: data.id ?? `tmp-${Date.now()}`, title, durationMin: Number(dur) || 0, isPreview: preview, completed: false, videoUrl: videoUrl.trim() || null, imageUrls: images, content: content.trim() || null },
+    ]);
+    reset();
     toast("Leçon ajoutée ✓", "success");
   };
 
@@ -90,13 +125,18 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
         {list.map((l, i) => (
           <Row key={l.id} onDelete={async () => (await del(l.id)) && setList((x) => x.filter((y) => y.id !== l.id))}>
             <span className="text-[13px]">{i + 1}. {l.title}</span>
-            <span className="text-[11px] text-muted-foreground">{l.durationMin}min{l.isPreview ? " · aperçu" : ""}</span>
+            <span className="flex items-center gap-2 text-[11px] text-muted-foreground">
+              {l.durationMin}min{l.isPreview ? " · aperçu" : ""}
+              {l.videoUrl && <Video className="h-3 w-3 text-gold" />}
+              {l.imageUrls.length > 0 && <span className="text-gold">{l.imageUrls.length} 🖼</span>}
+            </span>
           </Row>
         ))}
         {list.length === 0 && <Empty>Aucune leçon.</Empty>}
       </div>
       <Divider />
-      <div className="grid gap-2">
+
+      <div className="grid gap-2.5">
         <Input placeholder="Titre de la leçon" value={title} onChange={(e) => setTitle(e.target.value)} />
         <div className="flex gap-2">
           <Input placeholder="Durée (min)" type="number" value={dur} onChange={(e) => setDur(e.target.value)} className="flex-1" />
@@ -107,7 +147,56 @@ function LessonManager({ courseId, initial }: { courseId: string; initial: Lesso
             Aperçu gratuit
           </button>
         </div>
-        <Button onClick={add}><Plus className="h-4 w-4" /> Ajouter la leçon</Button>
+
+        {/* Video URL */}
+        <div>
+          <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+            <Video className="h-3.5 w-3.5" /> Vidéo (lien YouTube, Vimeo ou MP4)
+          </div>
+          <Input placeholder="https://..." value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
+        </div>
+
+        {/* Slideshow images */}
+        <div>
+          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
+            <ImageUp className="h-3.5 w-3.5" /> Diapositives / images
+          </div>
+          {images.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-2">
+              {images.map((url, i) => (
+                <div key={i} className="relative h-16 w-16 overflow-hidden rounded-lg border border-border">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  <button
+                    onClick={() => setImages((arr) => arr.filter((_, j) => j !== i))}
+                    className="absolute right-0.5 top-0.5 grid h-4 w-4 place-items-center rounded-full bg-black/70 text-white"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border py-3 text-[12px] font-semibold text-muted-foreground">
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageUp className="h-4 w-4" />}
+            {uploading ? "Téléversement…" : "Téléverser des images"}
+            <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => uploadImages(e.target.files)} />
+          </label>
+        </div>
+
+        {/* Text content */}
+        <div>
+          <div className="mb-1 text-[11px] font-semibold text-muted-foreground">Notes / contenu écrit (optionnel)</div>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={3}
+            placeholder="Points clés, ressources, transcription…"
+            className="w-full resize-none rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm outline-none focus:border-gold"
+          />
+        </div>
+
+        <Button onClick={add} disabled={uploading}><Plus className="h-4 w-4" /> Ajouter la leçon</Button>
       </div>
     </div>
   );

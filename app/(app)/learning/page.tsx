@@ -2,19 +2,22 @@ import Link from "next/link";
 import { Award, Check, Flame, Play, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui-card";
 import { SectionTitle } from "@/components/shell-section";
-import { ENROLLMENTS, getCourse } from "@/lib/data";
+import { getMyEnrollments } from "@/lib/enrollments";
 import { getLearningStats } from "@/lib/learning-stats";
 import { getCurrentUser } from "@/lib/auth";
 import { getDict } from "@/config/i18n";
 
 export default async function LearningPage() {
   const d = getDict();
-  const stats = await getLearningStats();
-  const user = await getCurrentUser();
-  const inProgress = ENROLLMENTS.filter((e) => !e.completed);
-  const completed = ENROLLMENTS.filter((e) => e.completed);
-  const featured = inProgress[0] ? getCourse(inProgress[0].courseId) : null;
-  const featuredEnrollment = inProgress[0];
+  const [stats, user, enrollments] = await Promise.all([
+    getLearningStats(),
+    getCurrentUser(),
+    getMyEnrollments(),
+  ]);
+  const inProgress = enrollments.filter((e) => !e.completed);
+  const completed = enrollments.filter((e) => e.completed);
+  const featured = inProgress[0]?.course ?? null;
+  const featuredEnrollment = inProgress[0] ?? null;
 
   return (
     <div className="animate-fade-up px-4 pt-4">
@@ -73,10 +76,10 @@ export default async function LearningPage() {
           <SectionTitle icon={<Play className="h-[17px] w-[17px] text-gold" />} title="Aussi en cours" />
           <div className="grid gap-2.5">
             {inProgress.slice(1).map((e) => {
-              const c = getCourse(e.courseId);
+              const c = e.course;
               if (!c) return null;
               return (
-                <Link key={e.courseId} href={`/courses/${c.id}`}>
+                <Link key={c.id} href={`/courses/${c.id}`}>
                   <Card className="flex items-center gap-3 p-3">
                     <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ backgroundImage: `linear-gradient(155deg, ${c.color}, #0c0f17)` }}>
                       <Play className="h-5 w-5 text-white/90" />
@@ -107,10 +110,10 @@ export default async function LearningPage() {
       ) : (
         <div className="grid gap-3">
           {completed.map((e) => {
-            const c = getCourse(e.courseId);
+            const c = e.course;
             if (!c) return null;
             return (
-              <Card key={e.courseId} className="flex items-center gap-3 border-emerald-500/30 p-3.5">
+              <Card key={c.id} className="flex items-center gap-3 border-emerald-500/30 p-3.5">
                 <Award className="h-8 w-8 text-emerald-400" />
                 <div className="flex-1">
                   <div className="text-sm font-bold">{c.title}</div>
