@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, BookOpen, CreditCard, LayoutDashboard, MessageSquare, Users } from "lucide-react";
+import { BarChart3, BookOpen, CalendarClock, CreditCard, LayoutDashboard, Layers, MessageSquare, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
   { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
   { href: "/admin/courses", label: "Formations", icon: BookOpen },
+  { href: "/admin/bundles", label: "Offres groupées", icon: Layers },
+  { href: "/admin/events", label: "Évènements", icon: CalendarClock },
   { href: "/admin/payments", label: "Paiements", icon: CreditCard },
   { href: "/admin/reviews", label: "Avis", icon: MessageSquare },
   { href: "/admin/users", label: "Utilisateurs", icon: Users },

@@ -27,6 +27,7 @@ export interface Bundle {
   color: string;
   courseIds: string[];
   blurb?: string;
+  featured?: boolean;
 }
 
 export interface AppEvent {

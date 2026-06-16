@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, Check, Layers } from "lucide-react";
-import { BUNDLES } from "@/lib/data";
+import { getBundleById } from "@/lib/bundles";
 import { getAllCourses } from "@/lib/courses";
 import { CourseCard } from "@/components/course-course-card";
 import { formatHTG } from "@/lib/utils";
 
 export default async function BundlePage({ params }: { params: { id: string } }) {
-  const bundle = BUNDLES.find((b) => b.id === params.id);
+  const bundle = await getBundleById(params.id);
   if (!bundle) notFound();
 
   const allCourses = await getAllCourses();
   const courses = allCourses.filter((c) => bundle.courseIds.includes(c.id));
-  const discount = Math.round((1 - bundle.price / bundle.was) * 100);
+  const discount = bundle.was > 0 ? Math.round((1 - bundle.price / bundle.was) * 100) : 0;
   const totalValue = courses.reduce((sum, c) => sum + c.price, 0);
 
   return (
