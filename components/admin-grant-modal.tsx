@@ -61,7 +61,10 @@ export function GrantModal({
       });
       const data = await res.json();
       if (data.error) toast(data.error, "error");
-      else {
+      else if (data.failures?.length) {
+        toast(`Accordé en partie. Échec : ${data.failures[0]}`, "error");
+        router.refresh();
+      } else {
         toast(`Accès accordé à ${user.fullName} ✓`, "success");
         router.refresh();
         onClose();

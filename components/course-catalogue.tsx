@@ -7,7 +7,8 @@ import { getDict } from "@/config/i18n";
 import { cn } from "@/lib/utils";
 import type { Course } from "@/types";
 
-export function Catalogue({ courses }: { courses: Course[] }) {
+export function Catalogue({ courses, ownedIds = [] }: { courses: Course[]; ownedIds?: string[] }) {
+  const owned = new Set(ownedIds);
   const d = getDict();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<string>(d.courses.filters[0]);
@@ -55,7 +56,7 @@ export function Catalogue({ courses }: { courses: Course[] }) {
 
       <div className="grid grid-cols-2 gap-3.5">
         {list.map((c) => (
-          <CourseCard key={c.id} course={c} fill />
+          <CourseCard key={c.id} course={c} fill owned={owned.has(c.id)} />
         ))}
       </div>
       {list.length === 0 && <p className="mt-10 text-center text-muted-foreground">{d.courses.none}</p>}

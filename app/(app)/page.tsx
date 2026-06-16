@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, Layers, Sparkles } from "lucide-react";
+import { Clock, Layers, Sparkles, TrendingUp } from "lucide-react";
 import { Card } from "@/components/ui-card";
 import { SectionTitle, Row } from "@/components/shell-section";
 import { CourseCard } from "@/components/course-course-card";
@@ -8,20 +8,28 @@ import { getAllCourses } from "@/lib/courses";
 import { getBundles, getFeaturedBundle } from "@/lib/bundles";
 import { getEvents } from "@/lib/events";
 import { getDict } from "@/config/i18n";
+import { getMyCourseIds } from "@/lib/enrollments";
 import { getCurrentUser } from "@/lib/auth";
 import { GoogleBanner } from "@/components/home-google-banner";
 import { formatHTG } from "@/lib/utils";
 
 export default async function HomePage() {
   const d = getDict();
-  const [courses, bundles, events, hero, user] = await Promise.all([
+  const [courses, bundles, events, hero, user, ownedIds] = await Promise.all([
     getAllCourses(),
     getBundles(),
     getEvents(),
     getFeaturedBundle(),
     getCurrentUser(),
+    getMyCourseIds(),
   ]);
+  const owned = new Set(ownedIds);
   const upcoming = courses.filter((c) => c.upcoming).slice(0, 4);
+  // Available now = released courses, ranked by rating then popularity (review count).
+  const available = courses
+    .filter((c) => !c.upcoming)
+    .sort((a, b) => b.rating - a.rating || b.reviews - a.reviews)
+    .slice(0, 10);
   const heroDiscount = hero && hero.was > 0 ? Math.round((1 - hero.price / hero.was) * 100) : 0;
 
   return (
@@ -67,13 +75,25 @@ export default async function HomePage() {
         </>
       )}
 
+      {/* Formations disponibles (released, ranked by rating + popularity) */}
+      {available.length > 0 && (
+        <>
+          <SectionTitle icon={<TrendingUp className="h-[17px] w-[17px] text-gold" />} title="Formations disponibles" />
+          <Row>
+            {available.map((c) => (
+              <CourseCard key={c.id} course={c} width={160} owned={owned.has(c.id)} />
+            ))}
+          </Row>
+        </>
+      )}
+
       {/* Prochaines formations (upcoming courses) */}
       {upcoming.length > 0 && (
         <>
           <SectionTitle icon={<Sparkles className="h-[17px] w-[17px] text-gold" />} title={d.home.upcoming} />
           <Row>
             {upcoming.map((c) => (
-              <CourseCard key={c.id} course={c} width={160} />
+              <CourseCard key={c.id} course={c} width={160} owned={owned.has(c.id)} />
             ))}
           </Row>
         </>
@@ -106,7 +126,7 @@ export default async function HomePage() {
       )}
 
       {/* Empty state when nothing is configured yet */}
-      {!hero && bundles.length === 0 && upcoming.length === 0 && events.length === 0 && (
+      {!hero && bundles.length === 0 && available.length === 0 && upcoming.length === 0 && events.length === 0 && (
         <div className="mt-16 text-center">
           <p className="text-sm font-semibold">Bienvenue sur AVS Formation</p>
           <p className="mx-auto mt-1.5 max-w-xs text-[13px] text-muted-foreground">

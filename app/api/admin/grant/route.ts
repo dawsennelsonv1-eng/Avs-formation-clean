@@ -33,10 +33,23 @@ export async function POST(req: NextRequest) {
   }
   if (courseIds.length === 0) return NextResponse.json({ error: "Aucune formation à accorder." }, { status: 400 });
 
-  // Grant access (idempotent).
-  const rows = courseIds.map((cid) => ({ user_id: userId, course_id: cid }));
-  const { error: enrErr } = await s.from("enrollments").upsert(rows, { onConflict: "user_id,course_id" });
-  if (enrErr) return NextResponse.json({ error: enrErr.message }, { status: 500 });
+  // Grant access per-course so one bad row can't block the rest (idempotent).
+  let granted = 0;
+  const failures: string[] = [];
+  for (const cid of courseIds) {
+    const { error } = await s
+      .from("enrollments")
+      .upsert({ user_id: userId, course_id: cid }, { onConflict: "user_id,course_id" });
+    if (error) failures.push(`${cid}: ${error.message}`);
+    else granted += 1;
+  }
+
+  if (granted === 0) {
+    return NextResponse.json(
+      { error: `Échec de l'attribution. ${failures[0] ?? ""}` },
+      { status: 500 }
+    );
+  }
 
   // Optionally record a direct (off-system) payment for the books.
   if (b.markPaid) {
@@ -58,5 +71,5 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({ ok: true, granted: courseIds.length });
+  return NextResponse.json({ ok: true, granted, failures: failures.length ? failures : undefined });
 }

@@ -15,21 +15,50 @@ import type { Course } from "@/types";
 import type { Flashcard, QuizQuestion } from "@/lib/learning-content";
 import type { Lesson } from "@/lib/learning-lessons";
 
-/* Renders a Bunny Stream embed, a YouTube embed, or a direct video — autoplaying. */
+/* A moving watermark with the viewer's name — forensic deterrent against screen recording. */
+function MovingWatermark({ label }: { label: string }) {
+  const positions = [
+    "left-3 top-3",
+    "right-3 top-3",
+    "right-3 bottom-14",
+    "left-3 bottom-14",
+    "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+  ];
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setI((v) => (v + 1) % positions.length), 7000);
+    return () => clearInterval(t);
+  }, [positions.length]);
+  return (
+    <div
+      className={cn(
+        "pointer-events-none absolute z-10 select-none rounded bg-black/30 px-2 py-0.5 text-[10px] font-semibold text-white/55 transition-all duration-1000",
+        positions[i]
+      )}
+    >
+      {label}
+    </div>
+  );
+}
+
+/* Renders a Bunny Stream embed, a YouTube embed, or a direct video — autoplaying, fullscreen-capable. */
 function CourseVideo({ url, onEnded, watermark }: { url: string; onEnded?: () => void; watermark?: string }) {
   const isBunny = url.includes("mediadelivery.net") || url.includes("iframe.media");
   const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
 
   if (isBunny) {
-    const src = url.includes("?") ? `${url}&autoplay=true&preload=true` : `${url}?autoplay=true&preload=true`;
+    const params = "autoplay=true&preload=true&responsive=true";
+    const src = url.includes("?") ? `${url}&${params}` : `${url}?${params}`;
     return (
-      <iframe
-        className="absolute inset-0 h-full w-full"
-        src={src}
-        loading="lazy"
-        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-        allowFullScreen
-      />
+      <div className="absolute inset-0" onContextMenu={(e) => e.preventDefault()}>
+        <iframe
+          className="h-full w-full"
+          src={src}
+          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allowFullScreen
+        />
+        {watermark && <MovingWatermark label={watermark} />}
+      </div>
     );
   }
   if (yt) {
@@ -46,19 +75,16 @@ function CourseVideo({ url, onEnded, watermark }: { url: string; onEnded?: () =>
     <div className="absolute inset-0" onContextMenu={(e) => e.preventDefault()}>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
-        className="h-full w-full"
+        className="h-full w-full select-none"
         src={url}
         controls
         autoPlay
+        playsInline
         onEnded={onEnded}
-        controlsList="nodownload noremoteplayback noplaybackrate"
+        controlsList="nodownload noremoteplayback"
         disablePictureInPicture
       />
-      {watermark && (
-        <div className="pointer-events-none absolute right-2 top-2 rounded bg-black/40 px-2 py-0.5 text-[10px] font-semibold text-white/70">
-          {watermark}
-        </div>
-      )}
+      {watermark && <MovingWatermark label={watermark} />}
     </div>
   );
 }
